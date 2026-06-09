@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* ── 印刷スタイル ──────────────────────────────── */
+@media print {
+  /* A4 余白設定 */
+  @page {
+    size: A4 portrait;
+    margin: 15mm 12mm 12mm 12mm;
+  }
+
+  /* body の背景を白に */
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 10pt;
+  }
+
+  /* アプリ本体（#root）を完全非表示 */
+  #root {
+    display: none !important;
+  }
+
+  /* 印刷レポート（portal で body 直下）を表示 */
+  #print-report {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+  }
+
+  /* テーブルが途中で切れないよう制御 */
+  table { page-break-inside: avoid; }
+  tr    { page-break-inside: avoid; }
+  h2    { page-break-after: avoid; }
+}
