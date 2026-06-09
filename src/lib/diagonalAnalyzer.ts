@@ -58,8 +58,8 @@ export function limitSlenderness(F_y = SM400.F, E = E_STEEL): number {
 export function computeDiagonalForces(
   diagonals: DiagonalMember[],
   distribution: DistributionCoefficients,
-  deadLoad: DeadLoadSettings,
-  spanLength_mm: number,
+  _deadLoad: DeadLoadSettings,
+  _spanLength_mm: number,
   impactFactor: number,
   liveLoadType: 'T' | 'B' = 'T'
 ): DiagonalForce[] {
