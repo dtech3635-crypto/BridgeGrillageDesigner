@@ -330,6 +330,23 @@ export function StressCheckTab({
                       }}>
                         {dc.ok ? 'OK' : 'NG'}
                       </span>
+                      {/* 圧縮材NGでも引張材基準(λ≤250)を満たす場合は但し書きを表示 */}
+                      {!dc.ok && dc.lambda <= 250 && (
+                        <div style={{
+                          fontSize: 9, color: '#fbbf24', marginTop: 2,
+                          fontFamily: 'monospace', whiteSpace: 'nowrap',
+                        }}>
+                          引張材OK (λ≤250)
+                        </div>
+                      )}
+                      {!dc.ok && dc.lambda > 250 && (
+                        <div style={{
+                          fontSize: 9, color: '#f87171', marginTop: 2,
+                          fontFamily: 'monospace', whiteSpace: 'nowrap',
+                        }}>
+                          引張材NG (λ&gt;250)
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -337,8 +354,11 @@ export function StressCheckTab({
             </table>
           </div>
           <div style={{ fontSize: 10, color: '#475569', fontFamily: 'monospace', marginTop: 6, lineHeight: 1.8 }}>
-            <div>SM400: F=235 N/mm²  ｜  Λ_c = π√(2E/F) ≒ {diagonalChecks[0]?.Lambda_c.toFixed(1)}  ｜  有効長係数 K=0.7（ガセットプレート接合）</div>
-            <div>λ = K·L/r_min  ｜  λ ≤ Λ_c: σ_ca=F(1−0.5(λ/Λ_c)²)/1.5  ｜  λ&gt;Λ_c: σ_ca=π²E/(1.5λ²)</div>
+            <div>Λ_c = π√(2E/F) ≒ {diagonalChecks[0]?.Lambda_c.toFixed(1)}  ｜  有効長係数 K=0.7（ガセットプレート接合）</div>
+            <div>λ = K·L/r_min  ｜  λ ≤ Λ_c: σ_ca=F(1−0.5(λ/Λ_c)²)/1.7  ｜  λ&gt;Λ_c: σ_ca=π²E/(1.7λ²)</div>
+            <div style={{ color: '#fbbf24', marginTop: 2 }}>
+              ※ 水平ブレース等の引張材は λ ≤ 250 を適用（JRA H29 §5.2）。圧縮座屈NGでも「引張材OK」表示の場合は引張設計として適切。
+            </div>
           </div>
         </div>
       )}
