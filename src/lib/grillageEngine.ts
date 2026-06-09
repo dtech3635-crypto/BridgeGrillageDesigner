@@ -544,7 +544,12 @@ export function runAnalysis(input: AnalysisInput): AnalysisResult {
     : [];
 
   if (diagonalChecks.some(c => c && !c.ok)) {
-    warnings.push('一部の斜材で許容応力度（座屈）超過があります');
+    const tenOK = diagonalChecks.filter(c => c && !c.ok).every(c => c!.lambda <= 250);
+    if (tenOK) {
+      warnings.push('斜材：圧縮座屈NG — ただし引張材基準（λ≤250）は満足');
+    } else {
+      warnings.push('一部の斜材で許容応力度超過（λ>250 引張材基準も超過）');
+    }
   }
 
   // Validation
