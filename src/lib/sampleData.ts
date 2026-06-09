@@ -73,8 +73,30 @@ export function createSampleModel(): GrillageModel {
     }
   }
 
-  // 斜材なし（非合成鈑桁橋のため省略）
+  // 水平ブレース（X型）: 対傾構＋中間横構
+  // 配置: 端部 2 パネル + 中央パネル（パネル 0, 1, 2, 3, 4 の両端＋中間）
   const diagonals: DiagonalMember[] = [];
+
+  const addDiag = (xi: number, yi: number, xj: number, yj: number) => {
+    const ddx = xj - xi, ddy = yj - yi;
+    diagonals.push({
+      id: diagonals.length,
+      nodeI: nodeAt(xi / dx, yi / a),
+      nodeJ: nodeAt(xj / dx, yj / a),
+      length: Math.sqrt(ddx * ddx + ddy * ddy),
+      angle:  Math.atan2(ddy, ddx),
+      layer:  'BEAM_DIAGONAL',
+    });
+  };
+
+  // 端部パネル(0, 4) と中央パネル(2) に G1-G2・G2-G3 の X 型配置
+  for (const p of [0, 2, 4]) {
+    const x0 = p * dx, x1 = (p + 1) * dx;
+    addDiag(x0, 0,     x1, a);       // G1→G2
+    addDiag(x0, a,     x1, 0);       // G2→G1
+    addDiag(x0, a,     x1, 2 * a);   // G2→G3
+    addDiag(x0, 2 * a, x1, a);       // G3→G2
+  }
 
   const crossBeamPositions = Array.from({ length: divX + 1 }, (_, ci) => ci * dx);
 
@@ -125,9 +147,15 @@ export function createDefaultBeamProps(model: GrillageModel): Record<number, Bea
   return props;
 }
 
-export function createDefaultDiagProps(_model: GrillageModel): Record<number, DiagElementProps> {
-  // 斜材なし
-  return {};
+export function createDefaultDiagProps(model: GrillageModel): Record<number, DiagElementProps> {
+  const props: Record<number, DiagElementProps> = {};
+  for (const diag of (model.diagonals ?? [])) {
+    props[diag.id] = {
+      sectionKey: 'L-150×150×15',  // 水平ブレース（大型鈑桁橋用）
+      steelGrade: 'SM490Y',
+    };
+  }
+  return props;
 }
 
 // ---- AnalysisInput 生成 ------------------------------------
