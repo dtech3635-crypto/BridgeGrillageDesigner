@@ -113,6 +113,9 @@ export function StressCheckTab({
               {checks.some(c => c.sigma_caf !== undefined) && (
                 <th style={{ padding: '8px 10px', textAlign: 'left', minWidth: 110 }}>圧縮フランジ</th>
               )}
+              {checks.some(c => c.ratio_combined !== undefined) && (
+                <th style={{ padding: '8px 10px', textAlign: 'left', minWidth: 120 }}>腹板合成</th>
+              )}
               <th style={{ padding: '8px 10px', textAlign: 'center' }}>判定</th>
             </tr>
           </thead>
@@ -167,6 +170,19 @@ export function StressCheckTab({
                         </td>
                       : <td />
                   )}
+                  {checks.some(cc => cc.ratio_combined !== undefined) && (
+                    c.ratio_combined !== undefined
+                      ? <td style={{ padding: '7px 10px' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {/* バーは ratio/1.2 でスケール（上限1.2） */}
+                            <RatioBar ratio={c.ratio_combined / 1.2} ok={c.combinedOK!} />
+                            <span style={{ fontSize: 9, color: '#475569', fontFamily: 'monospace' }}>
+                              {c.ratio_combined.toFixed(3)} ≤1.2 σ_w={c.sigma_w!.toFixed(1)}
+                            </span>
+                          </div>
+                        </td>
+                      : <td />
+                  )}
                   <td style={{ padding: '7px 10px', textAlign: 'center' }}>
                     <span style={{
                       padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700,
@@ -195,6 +211,13 @@ export function StressCheckTab({
             <div style={{ color: '#38bdf8', fontWeight: 600, marginBottom: 2 }}>圧縮フランジ座屈照査（JRA H29 §5.2.3）</div>
             <div>b₁ = (bf−tw)/2　｜　b₁/tf ≤ 10.5: 横倒れ σcag = F − 4.6×(l₀/bf − 3.5)　｜　b₁/tf &gt; 10.5: 局部 σcat = 23000×(tf/b₁)²</div>
             <div>l₀ = 横桁最大間隔（圧縮フランジ非支持長）　｜　σca = min(σcag または σcat, σta)</div>
+          </div>
+        )}
+        {checks.some(c => c.ratio_combined !== undefined) && (
+          <div style={{ marginTop: 4, paddingTop: 4, borderTop: '1px solid #1e293b' }}>
+            <div style={{ color: '#a78bfa', fontWeight: 600, marginBottom: 2 }}>腹板合成応力度照査（JRA H29 §5.2）</div>
+            <div>(σ_w/σa)² + (τ/τa)² ≤ 1.2　｜　σ_w: 腹板上端（上フランジ下端）の曲げ応力度</div>
+            <div>τ = V / (hw × tw)　｜　バーは上限1.2に対するスケール表示</div>
           </div>
         )}
       </div>

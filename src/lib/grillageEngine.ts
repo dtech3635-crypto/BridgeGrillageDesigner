@@ -326,7 +326,28 @@ function runStressCheck(
       cfOK      = ratio_cf <= 1.0;
     }
 
+    // ---- 腹板合成応力度照査 (Phase 4) ----
+    // 非合成鈑桁のみ対象。腹板上端（上フランジ下端）での曲げ＋せん断合成照査
+    // (σ_w/σa)² + (τ/τa)² ≤ 1.2
+    let sigma_w: number | undefined;
+    let ratio_combined: number | undefined;
+    let combinedOK: boolean | undefined;
+
+    if (sec.pg) {
+      const pg = sec.pg;
+      // 中立軸位置（下端から）
+      const yNA_from_bot = sec.Ix / sec.Zx;
+      // 腹板上端（上フランジ下端）の位置（下端から）= hw + tf_bot
+      const y_web_top = pg.hw + pg.tf_bot;
+      // NAからの距離
+      const y_from_NA = Math.abs(y_web_top - yNA_from_bot);
+      sigma_w = M * y_from_NA / sec.Ix;
+      ratio_combined = (sigma_w / sigma_sa) ** 2 + (tau / tau_allow) ** 2;
+      combinedOK = ratio_combined <= 1.2;
+    }
+
     const cfFails = cfOK === false;
+    const combFails = combinedOK === false;
     return {
       girderId: f.girderId,
       sigma_b, sigma_sa, ratio_b, bendingOK: ratio_b <= 1.0,
@@ -334,7 +355,8 @@ function runStressCheck(
       sigma_c, sigma_ca: CONC_ALLOW, ratio_c, concreteOK: ratio_c <= 1.0,
       sigma_top,
       sigma_caf, b1_tf, cfMode, ratio_cf, cfOK,
-      allOK: ratio_b <= 1.0 && ratio_s <= 1.0 && ratio_c <= 1.0 && !cfFails,
+      sigma_w, ratio_combined, combinedOK,
+      allOK: ratio_b <= 1.0 && ratio_s <= 1.0 && ratio_c <= 1.0 && !cfFails && !combFails,
       steelGrade: grade,
     };
   });
@@ -512,6 +534,9 @@ export function runAnalysis(input: AnalysisInput): AnalysisResult {
   const stressChecks = runStressCheck(designForces, girderSections, input, l0_max);
   if (stressChecks.some(c => !c.allOK)) {
     warnings.push('一部の主桁で許容応力度超過があります');
+  }
+  if (stressChecks.some(c => c.combinedOK === false)) {
+    warnings.push('腹板合成応力度照査NG: (σ/σa)²+(τ/τa)² > 1.2');
   }
 
   // 5b. Cross beam forces + checks

@@ -221,6 +221,12 @@ export interface StressCheckResult {
   /** σ_top / σ_caf */
   ratio_cf?: number;
   cfOK?: boolean;
+  // ---- 腹板合成応力度照査 (Phase 4) -------------------------
+  /** 腹板上端（上フランジ下端）の曲げ応力度 (N/mm²) */
+  sigma_w?: number;
+  /** (σ_w/σa)² + (τ/τa)²  ≤ 1.2 */
+  ratio_combined?: number;
+  combinedOK?: boolean;
   allOK: boolean;
   steelGrade: SteelGradeKey;
 }

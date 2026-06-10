@@ -87,7 +87,7 @@ export function PrintReport({ result, model, deadLoad, beamProps: _beamProps, li
   const diagNgCount = diagonalChecks.filter(c => !c.ok).length;
 
   // 代表断面ラベル（各桁の midspan 断面）
-  const _secLabel = (i: number) => {
+  const secLabel = (i: number) => {
     const s = girderSections[i];
     if (!s) return '--';
     return s.label + (s.isComposite ? `+RC${s.slabThickness}` : '');
@@ -301,12 +301,10 @@ export function PrintReport({ result, model, deadLoad, beamProps: _beamProps, li
             </thead>
             <tbody>
               {stressChecks.map((c, i) => {
-                const _f = designForces[i];
-                const s = girderSections[i];
                 return (
                   <tr key={i} style={{ background: !c.allOK ? '#fff0f0' : i % 2 ? '#f5f5f5' : '#fff' }}>
                     <TD bold={!c.allOK}>G{i + 1}</TD>
-                    <TD>{s ? s.label.split('×').slice(0, 2).join('×') + (s.isComposite ? '+RC' : '') : '--'}</TD>
+                    <TD>{secLabel(i)}</TD>
                     <TD>{c.steelGrade}</TD>
                     <TD right ng={!c.bendingOK}>{fmt1(c.sigma_b)}</TD>
                     <TD right>{c.sigma_sa}</TD>
